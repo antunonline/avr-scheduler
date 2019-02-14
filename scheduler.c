@@ -16,6 +16,8 @@
 #include "avr/interrupt.h"
 
 #define TASK_NUM_MAX 4
+
+
 #define TASK_STACK_SIZE 150
 
 static unsigned char *stack_pointers[TASK_NUM_MAX] = {0};
@@ -30,7 +32,7 @@ void scheduler_init()
 {
     unsigned int stack_pointer = scheduler_get_stack_address();
     for(unsigned char i = 0; i < TASK_NUM_MAX; i++){
-        stack_pointers[i] = (unsigned char*) stack_pointer - 40  - i*TASK_STACK_SIZE;
+        stack_pointers[i] = (unsigned char*) stack_pointer - 150  - i*TASK_STACK_SIZE;
     }
 }
 
@@ -248,8 +250,6 @@ void scheduler_switch_task(void){
                 "pop r0\n"
                 );
 
-    //    WDTCSR |= (1<<WDIE);
-
     asm volatile ("reti");
 }
 
@@ -257,4 +257,9 @@ ISR(WDT_vect, ISR_NAKED)
 {
     asm("jmp scheduler_switch_task\n");
 
+}
+
+void scheduler_yield()
+{
+    asm volatile("jmp scheduler_switch_task\n");
 }
