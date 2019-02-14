@@ -7,26 +7,56 @@
 #define F_CPU=16000000UL
 #endif
 
-#ifndef BAUD
-#define BAUD 19200UL
-#endif
-
 #include "avr/io.h"
-#include "avr/delay.h"
-#include "util/setbaud.h"
+#include "util/delay.h"
+#include "usart.h"
+#include "scheduler.h"
+#include "avr/interrupt.h"
 
-int main()
-{
-    // Write some value to USART
 
-    // Enable transmit
-    UCSR0B |= (1<<TXEN0);
+void my_task(void) {
+    DDRB |= (1<<PORTB5);
 
-    // Write data to transmit buffer
+//    usart_transmit_char(0xaa);
+   int i = 0;
     while(1){
-        while(! (UCSR0A & (1<<UDRE0)));
-        UDR0 = 'a';
+        usart_transmit_char(0xaa);
     }
+}
 
-    return 0;
+void my_task_b(void){
+    while(1){
+        usart_transmit_char(0xbb);
+    }
+}
+
+void my_task_c(void){
+    while(1){
+        usart_transmit_char(0xcc);
+    }
+}
+
+void my_task_d(void){
+    while(1){
+        usart_transmit_char(0xdd);
+    }
+}
+
+int main(void){
+    // Init usart
+    usart_init(19200);
+
+    // Init scheduler
+    scheduler_init();
+
+    // Register custom task
+    scheduler_register_task(my_task);
+    scheduler_register_task(my_task_b);
+    scheduler_register_task(my_task_c);
+    scheduler_register_task(my_task_d);
+
+    // Store scheduler task
+    scheduler_enter();
+
+    while(1){}
 }
